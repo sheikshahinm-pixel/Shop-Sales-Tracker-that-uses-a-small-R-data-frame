@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>R Project – Shop Sales with Data Frames and Operators</title>
+<style>
+  :root{
+    --bg:#f3f6fc; --card:#ffffff; --ink:#18213a; --muted:#6a7694; --line:#e0e6f3;
+    --accent:#2563eb; --accent-soft:#e3ecfd;
+    --good:#16a34a; --bad:#dc2626; --grey:#94a3b8;
+    --code-bg:#0f172a; --code-ink:#e2e8f0;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0d1220; --card:#161d31; --ink:#e7ecf8; --muted:#9aa7c7; --line:#27314d; --accent:#60a5fa; --accent-soft:#1c2b4d; --grey:#64748b; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+  header{padding:28px 24px 0;max-width:1100px;margin:0 auto}
+  header h1{margin:0;font-size:1.65rem;letter-spacing:-.01em}
+  header p{margin:4px 0 0;color:var(--muted)}
+  .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .badge{background:var(--accent-soft);color:var(--accent);padding:3px 11px;border-radius:99px;font-size:.78rem;font-weight:600}
+  nav{max-width:1100px;margin:18px auto 0;padding:0 24px;display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+  nav button{background:none;border:0;color:var(--muted);padding:10px 16px;font:inherit;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap}
+  nav button.on{color:var(--accent);border-bottom-color:var(--accent)}
+  main{max-width:1100px;margin:0 auto;padding:22px 24px 60px}
+  section.tab{display:none}
+  section.tab.on{display:block}
+  .controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px 28px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 18px;margin-bottom:16px}
+  .ctl{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .ctl label{font-weight:600}
+  .ctl input[type=range]{flex:1;min-width:140px;accent-color:var(--accent)}
+  .ctl .val{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent);min-width:56px;text-align:right}
+  .ctl small{flex-basis:100%;color:var(--muted)}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:16px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .kpi .l{font-size:.76rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+  .kpi .v{font-size:1.55rem;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}
+  .kpi .s{font-size:.8rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-bottom:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;min-width:0}
+  .card h3{margin:0 0 10px;font-size:.98rem}
+  .c7{grid-column:span 7}.c5{grid-column:span 5}.c12{grid-column:span 12}
+  @media(max-width:860px){.c7,.c5{grid-column:span 12}}
+  svg{width:100%;height:auto;display:block}
+  svg text{fill:var(--muted);font-size:11px;font-family:inherit}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.8rem;color:var(--muted);margin-top:8px}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  .tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+  select,input[type=number]{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:inherit}
+  .tbl-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:.88rem}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{color:var(--muted);font-size:.74rem;text-transform:uppercase;letter-spacing:.05em}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+  th.r{text-align:right}
+  .tf{padding:2px 9px;border-radius:99px;font-size:.74rem;font-weight:700;color:#fff}
+  .tf.T{background:var(--good)}.tf.F{background:var(--grey)}
+  .codebox{margin-top:10px;padding:9px 13px;background:var(--accent-soft);border-radius:10px;font:12.5px/1.5 ui-monospace,Menlo,Consolas,monospace;overflow-x:auto;white-space:pre}
+  .pg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+  .pg label{font-size:.76rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:3px}
+  .pg input{width:100%}
+  .ops{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px}
+  .ops .g{grid-column:1/-1;font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-top:6px}
+  .op{display:flex;justify-content:space-between;gap:10px;padding:5px 9px;background:var(--bg);border:1px solid var(--line);border-radius:8px;font:12.5px ui-monospace,Menlo,Consolas,monospace}
+  .op b{color:var(--accent)}
+  pre.console,pre.code{background:var(--code-bg);color:var(--code-ink);border-radius:12px;padding:16px 18px;overflow:auto;font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;margin:0;max-height:520px}
+  .code .k{color:#c4b5fd}.code .s{color:#86efac}.code .c{color:#64748b;font-style:italic}.code .n{color:#fbbf24}.code .f{color:#7dd3fc}
+  .btn{background:var(--accent);color:#fff;border:0;padding:8px 16px;border-radius:8px;font:inherit;font-weight:600;cursor:pointer}
+  .btn.alt{background:var(--accent-soft);color:var(--accent)}
+  .row{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+  .concepts{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px}
+  .concepts .card h3{color:var(--accent)}
+  code.i,.concepts code,.steps code{background:var(--accent-soft);color:var(--accent);padding:1px 6px;border-radius:5px;font-size:.85em}
+  .concepts ul{padding-left:18px;margin:8px 0 0}
+  .steps li{margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🛒 Shop Sales Tracker</h1>
+  <p>A very, very simple R mini project built on <b>data frames</b> and <b>operators</b> — with a live dashboard.</p>
+  <div class="badges"><span class="badge">data.frame()</span><span class="badge">+ − × ÷ %% %/%</span><span class="badge">&gt; &lt; == &gt;=</span><span class="badge">&amp; | !</span></div>
+</header>
+
+<nav id="nav">
+  <button data-t="dash" class="on">Dashboard</button>
+  <button data-t="code">R Code</button>
+  <button data-t="concepts">Concepts Used</button>
+  <button data-t="run">How to Run</button>
+</nav>
+
+<main>
+
+<!-- ============ DASHBOARD ============ -->
+<section id="dash" class="tab on">
+  <div class="controls">
+    <div class="ctl">
+      <label for="rv">Top-seller revenue</label>
+      <input type="range" id="rv" min="1000" max="4000" step="100" value="2500">
+      <span class="val" id="rvv">2,500</span>
+      <small>R variable <code class="i">min_revenue</code> — <code class="i">revenue &gt;= min_revenue</code> makes an item a top seller.</small>
+    </div>
+    <div class="ctl">
+      <label for="cp">Cheap price limit</label>
+      <input type="range" id="cp" min="20" max="500" step="10" value="100">
+      <span class="val" id="cpv">100</span>
+      <small>R variable <code class="i">cheap_limit</code> — <code class="i">price &lt; cheap_limit &amp; qty &gt; 30</code> means cheap and popular.</small>
+    </div>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="grid">
+    <div class="card c7"><h3>Revenue per item <small style="color:var(--muted);font-weight:400">(price * qty)</small></h3><div id="chart"></div>
+      <div class="legend"><span><i style="background:var(--good)"></i>top_seller = TRUE</span><span><i style="background:var(--grey)"></i>top_seller = FALSE</span><span>— dashed line = min_revenue</span></div></div>
+    <div class="card c5">
+      <h3>Operator playground</h3>
+      <div class="pg"><div><label for="a">a</label><input type="number" id="a" value="17"></div><div><label for="b">b</label><input type="number" id="b" value="5"></div></div>
+      <div class="ops" id="ops"></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card c12">
+      <h3>The data frame <code class="i">shop</code></h3>
+      <div class="tools">
+        <label for="flt" style="font-weight:600">Show rows where:</label>
+        <select id="flt">
+          <option value="all">all rows</option>
+          <option value="top">top_seller == TRUE</option>
+          <option value="cheap">cheap_popular == TRUE</option>
+          <option value="either">top_seller | cheap_popular</option>
+          <option value="not">!top_seller</option>
+          <option value="p100">price &gt; 100</option>
+        </select>
+      </div>
+      <div class="tbl-wrap"><table id="tbl"></table></div>
+      <div class="codebox" id="codebox"></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card c12">
+      <h3>Console output <small style="color:var(--muted);font-weight:400">— what <code class="i">Rscript shop_sales.R</code> prints with the current slider values</small></h3>
+      <pre class="console" id="console"></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CODE ============ -->
+<section id="code" class="tab">
+  <div class="row">
+    <button class="btn" id="dl">⬇ Download shop_sales.R</button>
+    <button class="btn alt" id="cp2">Copy code</button>
+    <small style="color:var(--muted)">The two variables at the top follow your slider settings.</small>
+  </div>
+  <pre class="code" id="codeview"></pre>
+</section>
+
+<!-- ============ CONCEPTS ============ -->
+<section id="concepts" class="tab">
+  <div class="concepts">
+    <div class="card"><h3>1 · Data frame</h3>
+      <ul>
+        <li>A data frame is a table: columns are vectors of equal length.</li>
+        <li><code>data.frame(item = c(...), price = c(...), qty = c(...))</code></li>
+        <li><code>nrow()</code>, <code>ncol()</code>, <code>names()</code> describe its size and columns.</li>
+      </ul></div>
+    <div class="card"><h3>2 · Picking data</h3>
+      <ul>
+        <li><code>shop$price</code> – one column.</li>
+        <li><code>shop[2, "item"]</code> – row 2, column "item".</li>
+        <li><code>shop[shop$price &gt; 100, ]</code> – rows that pass a test.</li>
+        <li><code>shop[order(-shop$revenue), ]</code> – sort rows.</li>
+      </ul></div>
+    <div class="card"><h3>3 · Arithmetic operators</h3>
+      <ul>
+        <li><code>+ - * /</code> and <code>^</code> work on whole columns at once.</li>
+        <li><code>%/%</code> – whole-number division (packs of 10).</li>
+        <li><code>%%</code> – remainder (items left loose).</li>
+        <li><code>shop$revenue &lt;- shop$price * shop$qty</code> adds a new column.</li>
+      </ul></div>
+    <div class="card"><h3>4 · Comparison operators</h3>
+      <ul>
+        <li><code>&gt;  &lt;  &gt;=  &lt;=  ==  !=</code> give TRUE or FALSE.</li>
+        <li>On a column they give one TRUE/FALSE per row.</li>
+        <li>Remember: <code>==</code> compares, <code>=</code> / <code>&lt;-</code> assign.</li>
+      </ul></div>
+    <div class="card"><h3>5 · Logical operators</h3>
+      <ul>
+        <li><code>&amp;</code> – AND: both must be TRUE.</li>
+        <li><code>|</code> – OR: at least one TRUE.</li>
+        <li><code>!</code> – NOT: flips TRUE and FALSE.</li>
+        <li>Try them in the "Show rows where" box on the dashboard.</li>
+      </ul></div>
+    <div class="card"><h3>6 · Summary functions</h3>
+      <ul>
+        <li><code>sum()</code>, <code>mean()</code> on a column.</li>
+        <li><code>which.max()</code> – row number of the biggest value.</li>
+        <li><code>paste(..., collapse = ", ")</code> – join names into text.</li>
+      </ul></div>
+    <div class="card" style="grid-column:1/-1"><h3>Ideas to extend the project</h3>
+      <ul>
+        <li>Add a <code>discount</code> column: <code>shop$price * 0.9</code>.</li>
+        <li>Use <code>ifelse(shop$qty &lt; 10, "Restock", "OK")</code> to flag low stock.</li>
+        <li>Read the table from a file with <code>read.csv("shop.csv")</code>.</li>
+      </ul></div>
+  </div>
+</section>
+
+<!-- ============ RUN ============ -->
+<section id="run" class="tab">
+  <div class="card">
+    <h3>Run the project in R</h3>
+    <ol class="steps">
+      <li>Install R (and optionally RStudio) from <b>cran.r-project.org</b>.</li>
+      <li>Open the <b>R Code</b> tab and click <b>Download shop_sales.R</b> (or copy the code into a new script in RStudio).</li>
+      <li>In RStudio press <b>Source</b>, or from a terminal run: <code>Rscript shop_sales.R</code></li>
+      <li>Change <code>min_revenue</code> or <code>cheap_limit</code> at the top and run again — compare with the console panel on the dashboard.</li>
+      <li>In the R console, type <code>shop</code> or <code>View(shop)</code> after sourcing to see the whole data frame.</li>
+    </ol>
+    <p style="color:var(--muted)">Note: this dashboard re-implements the same logic in JavaScript so it can run live in a browser. The R script is the actual project; the dashboard is its visual front end.</p>
+  </div>
+</section>
+
+</main>
+
+<!-- ================= R SOURCE ================= -->
+<script type="text/plain" id="rsrc"># ==========================================================
+#  SHOP SALES TRACKER  -  a very, very simple R project
+#  Concepts: data frames + operators
+#            (arithmetic, comparison and logical)
+# ==========================================================
+
+min_revenue <- __REV__      # a "top seller" earns at least this much
+cheap_limit <- __CHEAP__      # an item is "cheap" if its price is below this
+
+list_or_none <- function(x) {
+  if (length(x) == 0) "None" else paste(x, collapse = ", ")
+}
+
+# ---------- 1. CREATE A DATA FRAME ----------
+shop <- data.frame(
+  item  = c("Pen", "Notebook", "Bag", "Bottle", "Pencil Box", "Marker"),
+  price = c(10, 50, 450, 110, 80, 35),
+  qty   = c(120, 60, 8, 25, 30, 40),
+  stringsAsFactors = FALSE
+)
+
+cat("--- THE DATA FRAME ---\n")
+cat(sprintf("%-7s: %s\n", "Rows", nrow(shop)))
+cat(sprintf("%-7s: %s\n", "Columns", ncol(shop)))
+cat(sprintf("%-7s: %s\n", "Names", paste(names(shop), collapse = ", ")))
+
+# ---------- 2. ARITHMETIC OPERATORS  ( + - * / %/% %% ) ----------
+shop$revenue <- shop$price * shop$qty        # multiply
+shop$gst     <- shop$revenue * 0.05          # 5% tax
+shop$total   <- shop$revenue + shop$gst      # add
+shop$packs   <- shop$qty %/% 10              # whole packs of 10
+shop$loose   <- shop$qty %% 10               # items left over
+
+# ---------- 3. COMPARISON AND LOGICAL OPERATORS ----------
+shop$top_seller    <- shop$revenue >= min_revenue                # comparison
+shop$cheap_popular <- shop$price < cheap_limit & shop$qty > 30   # comparison + AND
+
+# ---------- 4. PRINT THE TABLE ----------
+cat("\n--- SALES TABLE ---\n")
+for (i in 1:nrow(shop)) {
+  cat(sprintf("%-11s price=%4d qty=%4d revenue=%6d gst=%7.2f total=%8.2f\n",
+              shop$item[i], shop$price[i], shop$qty[i],
+              shop$revenue[i], shop$gst[i], shop$total[i]))
+}
+
+# ---------- 5. OPERATORS AT WORK ----------
+cat("\n--- OPERATORS AT WORK ---\n")
+cat(sprintf("%-22s: %s\n", "Top sellers (>=)",
+            list_or_none(shop$item[shop$top_seller])))
+cat(sprintf("%-22s: %s\n", "Cheap & popular (&)",
+            list_or_none(shop$item[shop$cheap_popular])))
+cat(sprintf("%-22s: %s\n", "Either one (|)",
+            list_or_none(shop$item[shop$top_seller | shop$cheap_popular])))
+cat(sprintf("%-22s: %s\n", "Not top sellers (!)",
+            list_or_none(shop$item[!shop$top_seller])))
+cat(sprintf("%-22s: %s\n", "Packs + loose (%/% %%)",
+            paste0(shop$item, " ", shop$packs, "+", shop$loose, collapse = ", ")))
+
+# ---------- 6. WORKING WITH THE DATA FRAME ----------
+cat("\n--- DATA FRAME OPERATIONS ---\n")
+best   <- shop[which.max(shop$revenue), ]          # pick one row
+sorted <- shop[order(-shop$revenue), ]             # sort rows
+dear   <- shop[shop$price > 100, ]                 # rows that pass a test
+cat(sprintf("%-22s: %s (%d)\n", "Best seller", best$item, best$revenue))
+cat(sprintf("%-22s: %s\n", "Revenue order", paste(sorted$item, collapse = " > ")))
+cat(sprintf("%-22s: %d\n", "Total revenue", sum(shop$revenue)))
+cat(sprintf("%-22s: %.2f\n", "Total with GST", sum(shop$total)))
+cat(sprintf("%-22s: %.1f\n", "Average price", mean(shop$price)))
+cat(sprintf("%-22s: %s\n", 'shop[2, "item"]', shop[2, "item"]))
+cat(sprintf("%-22s: %s\n", "shop[price > 100, ]", list_or_none(dear$item)))
+</script>
+
+<script>
+/* ============ DATA (same as the R script) ============ */
+const SHOP=[
+  {item:"Pen",price:10,qty:120},{item:"Notebook",price:50,qty:60},{item:"Bag",price:450,qty:8},
+  {item:"Bottle",price:110,qty:25},{item:"Pencil Box",price:80,qty:30},{item:"Marker",price:35,qty:40}
+];
+let minRev=2500, cheapLim=100;
+
+/* ============ HELPERS ============ */
+const $=id=>document.getElementById(id);
+const pad=(s,n)=>String(s).padEnd(n), lpad=(s,n)=>String(s).padStart(n);
+const sum=a=>a.reduce((x,y)=>x+y,0);
+const fmt=n=>Math.round(n).toLocaleString("en-US");
+const listOrNone=a=>a.length?a.join(", "):"None";
+const whichMax=a=>{let b=0;a.forEach((v,i)=>{if(v>a[b])b=i;});return b;};
+const TF=v=>`<span class="tf ${v?"T":"F"}">${v?"TRUE":"FALSE"}</span>`;
+
+/* ============ ANALYSIS (operators on columns) ============ */
+function analyse(){
+  return SHOP.map(r=>{
+    const revenue=r.price*r.qty, gst=revenue*0.05, total=revenue+gst;
+    const packs=Math.floor(r.qty/10), loose=r.qty%10;
+    const top=revenue>=minRev, cheapPop=r.price<cheapLim && r.qty>30;
+    return {...r,revenue,gst,total,packs,loose,top,cheapPop};
+  });
+}
+
+/* ============ RENDER ============ */
+function render(){
+  const d=analyse(), n=d.length;
+  const totRev=sum(d.map(r=>r.revenue)), totAll=sum(d.map(r=>r.total));
+  const best=d[whichMax(d.map(r=>r.revenue))];
+  $("kpis").innerHTML=[
+    ["Items (rows)",n,"nrow(shop)"],
+    ["Total revenue","₹"+fmt(totRev),"sum(shop$revenue)"],
+    ["With GST","₹"+fmt(totAll),"sum(shop$total)"],
+    ["Top sellers",d.filter(r=>r.top).length,"revenue >= "+fmt(minRev)],
+    ["Cheap & popular",d.filter(r=>r.cheapPop).length,"price < "+cheapLim+" & qty > 30"],
+    ["Best seller",best.item,"₹"+fmt(best.revenue)]
+  ].map(k=>`<div class="kpi"><div class="l">${k[0]}</div><div class="v">${k[1]}</div><div class="s">${k[2]}</div></div>`).join("");
+  chart(d); table(d); consoleOut(d); setCode();
+}
+
+function chart(d){
+  const W=520,L=86,rowH=40,H=d.length*rowH+24, mx=Math.max(...d.map(r=>r.revenue),minRev)*1.05, sx=v=>L+(W-L-50)*v/mx;
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Revenue per item">`;
+  d.forEach((r,i)=>{ const y=i*rowH+6;
+    s+=`<text x="${L-8}" y="${y+20}" text-anchor="end">${r.item}</text><rect x="${L}" y="${y}" width="${sx(r.revenue)-L}" height="26" rx="5" fill="${r.top?"var(--good)":"var(--grey)"}"><title>${r.item}: ${r.price} × ${r.qty} = ${fmt(r.revenue)}</title></rect><text x="${sx(r.revenue)+6}" y="${y+18}" style="fill:var(--ink);font-weight:600">${fmt(r.revenue)}</text>`; });
+  s+=`<line x1="${sx(minRev)}" x2="${sx(minRev)}" y1="0" y2="${H-14}" stroke="var(--bad)" stroke-width="1.8" stroke-dasharray="6 4"/><text x="${sx(minRev)}" y="${H-2}" text-anchor="middle">min_revenue ${fmt(minRev)}</text>`;
+  $("chart").innerHTML=s+"</svg>";
+}
+
+const FILTERS={
+  all:[()=>true,"shop"],
+  top:[r=>r.top,"shop[shop$top_seller, ]"],
+  cheap:[r=>r.cheapPop,"shop[shop$cheap_popular, ]"],
+  either:[r=>r.top||r.cheapPop,"shop[shop$top_seller | shop$cheap_popular, ]"],
+  not:[r=>!r.top,"shop[!shop$top_seller, ]"],
+  p100:[r=>r.price>100,"shop[shop$price > 100, ]"]
+};
+function table(d){
+  const f=FILTERS[$("flt").value], rows=d.filter(f[0]);
+  let h=`<thead><tr><th>#</th><th>item</th><th class="r">price</th><th class="r">qty</th><th class="r">revenue</th><th class="r">gst</th><th class="r">total</th><th class="r">packs</th><th class="r">loose</th><th>top_seller</th><th>cheap_popular</th></tr></thead><tbody>`;
+  rows.forEach(r=>{ const i=SHOP.findIndex(x=>x.item===r.item)+1;
+    h+=`<tr><td>${i}</td><td><b>${r.item}</b></td><td class="num">${r.price}</td><td class="num">${r.qty}</td><td class="num">${fmt(r.revenue)}</td><td class="num">${r.gst.toFixed(2)}</td><td class="num">${r.total.toFixed(2)}</td><td class="num">${r.packs}</td><td class="num">${r.loose}</td><td>${TF(r.top)}</td><td>${TF(r.cheapPop)}</td></tr>`; });
+  if(!rows.length) h+=`<tr><td colspan="11" style="color:var(--muted)">No rows match — R would show: &lt;0 rows&gt;</td></tr>`;
+  $("tbl").innerHTML=h+"</tbody>";
+  $("codebox").textContent="> "+f[1]+"\n# "+rows.length+" of "+d.length+" rows";
+}
+
+/* ============ OPERATOR PLAYGROUND ============ */
+function rnum(x){ if(Number.isNaN(x)) return "NaN"; if(x===Infinity) return "Inf"; if(x===-Infinity) return "-Inf"; return String(Number(x.toPrecision(7))); }
+function playground(){
+  const a=+$("a").value, b=+$("b").value;
+  if(!isFinite(a)||!isFinite(b)){ $("ops").innerHTML=`<div class="g">Enter two numbers</div>`; return; }
+  const A=rnum(a), B=rnum(b);
+  const mod=b===0?NaN:a-Math.floor(a/b)*b, idiv=b===0?(a===0?NaN:a>0?Infinity:-Infinity):Math.floor(a/b);
+  const T=v=>v?"TRUE":"FALSE", big=a>10, bigb=b>10;
+  const rows=[["Arithmetic"],
+    [`${A} + ${B}`,rnum(a+b)],[`${A} - ${B}`,rnum(a-b)],[`${A} * ${B}`,rnum(a*b)],[`${A} / ${B}`,rnum(b===0?(a===0?NaN:a>0?Infinity:-Infinity):a/b)],
+    [`${A} ^ ${B}`,rnum(Math.pow(a,b))],[`${A} %% ${B}`,rnum(mod)],[`${A} %/% ${B}`,rnum(idiv)],
+    ["Comparison"],
+    [`${A} > ${B}`,T(a>b)],[`${A} < ${B}`,T(a<b)],[`${A} >= ${B}`,T(a>=b)],[`${A} <= ${B}`,T(a<=b)],[`${A} == ${B}`,T(a===b)],[`${A} != ${B}`,T(a!==b)],
+    ["Logical  (uses a > 10 and b > 10)"],
+    [`(${A} > 10) & (${B} > 10)`,T(big&&bigb)],[`(${A} > 10) | (${B} > 10)`,T(big||bigb)],[`!(${A} > 10)`,T(!big)]];
+  $("ops").innerHTML=rows.map(r=>r.length===1?`<div class="g">${r[0]}</div>`:`<div class="op"><span>${r[0]}</span><b>${r[1]}</b></div>`).join("");
+}
+
+/* ============ CONSOLE (mirror of the R printing) ============ */
+function consoleOut(d){
+  const o=[], P=22, items=pred=>listOrNone(d.filter(pred).map(r=>r.item));
+  o.push("--- THE DATA FRAME ---",pad("Rows",7)+": 6",pad("Columns",7)+": 3",pad("Names",7)+": item, price, qty");
+  o.push("","--- SALES TABLE ---");
+  d.forEach(r=>o.push(`${pad(r.item,11)} price=${lpad(r.price,4)} qty=${lpad(r.qty,4)} revenue=${lpad(r.revenue,6)} gst=${lpad(r.gst.toFixed(2),7)} total=${lpad(r.total.toFixed(2),8)}`));
+  o.push("","--- OPERATORS AT WORK ---",
+    pad("Top sellers (>=)",P)+": "+items(r=>r.top),
+    pad("Cheap & popular (&)",P)+": "+items(r=>r.cheapPop),
+    pad("Either one (|)",P)+": "+items(r=>r.top||r.cheapPop),
+    pad("Not top sellers (!)",P)+": "+items(r=>!r.top),
+    pad("Packs + loose (%/% %%)",P)+": "+d.map(r=>`${r.item} ${r.packs}+${r.loose}`).join(", "));
+  const best=d[whichMax(d.map(r=>r.revenue))], sorted=[...d].sort((x,y)=>y.revenue-x.revenue);
+  o.push("","--- DATA FRAME OPERATIONS ---",
+    pad("Best seller",P)+`: ${best.item} (${best.revenue})`,
+    pad("Revenue order",P)+": "+sorted.map(r=>r.item).join(" > "),
+    pad("Total revenue",P)+": "+sum(d.map(r=>r.revenue)),
+    pad("Total with GST",P)+": "+sum(d.map(r=>r.total)).toFixed(2),
+    pad("Average price",P)+": "+(sum(d.map(r=>r.price))/d.length).toFixed(1),
+    pad('shop[2, "item"]',P)+": "+d[1].item,
+    pad("shop[price > 100, ]",P)+": "+items(r=>r.price>100));
+  $("console").textContent=o.join("\n");
+}
+
+/* ============ R CODE VIEW ============ */
+const SRC_T=$("rsrc").textContent.replace(/^\n/,"");
+let SRC="";
+function setCode(){
+  SRC=SRC_T.replace("__REV__",String(minRev)).replace("__CHEAP__",String(cheapLim));
+  const e=SRC.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  const re=/(#.*)|("[^"\n]*"|'[^'\n]*')|\b(function|if|else|for|while|repeat|break|next|return|in|TRUE|FALSE|NULL|NA)\b|\b([A-Za-z_.][A-Za-z0-9_.]*)(?=\()|(\b\d+(?:\.\d+)?\b)/g;
+  $("codeview").innerHTML=e.replace(re,(m,c,s,k,f,n)=>c?`<span class="c">${c}</span>`:s?`<span class="s">${s}</span>`:k?`<span class="k">${k}</span>`:f?`<span class="f">${f}</span>`:`<span class="n">${n}</span>`);
+}
+$("dl").onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([SRC],{type:"text/plain"}));a.download="shop_sales.R";a.click();URL.revokeObjectURL(a.href);};
+$("cp2").onclick=async()=>{try{await navigator.clipboard.writeText(SRC);$("cp2").textContent="Copied ✓";}catch(e){$("cp2").textContent="Select & copy manually";}setTimeout(()=>$("cp2").textContent="Copy code",1800);};
+
+/* ============ EVENTS ============ */
+$("rv").oninput=e=>{ minRev=+e.target.value; $("rvv").textContent=fmt(minRev); render(); };
+$("cp").oninput=e=>{ cheapLim=+e.target.value; $("cpv").textContent=cheapLim; render(); };
+$("flt").onchange=()=>table(analyse());
+$("a").oninput=$("b").oninput=playground;
+document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("#nav button").forEach(x=>x.classList.toggle("on",x===b));
+  document.querySelectorAll("section.tab").forEach(s=>s.classList.toggle("on",s.id===b.dataset.t));
+});
+playground(); render();
+</script>
+</body>
+</html>
